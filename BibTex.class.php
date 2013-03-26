@@ -2,28 +2,66 @@
 if (!defined('MEDIAWIKI')) die();
 
 class BibTex {
+  // The Page which has all the entrys
+  var $database;
+  
+  // parameters
+  var $dbpage;
+
+  // old from ExternBib
+
   // the database
   var $dbs = array();
   // the currently handled entry
   var $current_entry;
 
-  // parameters
+
   var $filedirs;
   var $filebaseurls;
   var $doibaseurl;
   var $eprintbaseurl;
   var $default_format;
 
-  function BibTex($dbfiles, 
-		     $filedirs,
-		     $filebaseurls,
+  function BibTex($wgBibTexDBPage,
 		     $doibaseurl,
 		     $eprintbaseurl,
 		     $default_format) {
+    $dbpage = $wgBibTexDBPage;
+    $database = Title::newFromText($dbpage);
+    if ($database==NULL || !$database->exists()){
+      echo "Warning:\"$dbpage\" does not exist!<br>";
+    }
+    else {
+      //$out .= "page is:".$page."<br>";
+    }
   }
 
   function mytestfunc( $input, $argv, $parser, $frame ) {
-    return "Hallo welt!";
+    $out='';
+    //print_r($page);
+    //print_r($database -> getSemanticData ());
+    return $out."Hallo Welt!";
+  }
+  
+  function updateDB($xmlPath){
+    $xml=simplexml_load_file($xmlPath);
+    
+    foreach ($xml->entry as $entry){
+      $cur_id='';
+      $subobject = Subobject::Factory($database,'BibTexEntry');
+      foreach($entry->attributes() as $a => $b){
+	if ($a == "id"){
+	  $cur_id = $b;
+	}
+      }
+      $subobject->addPropertyValue("id",$cur_id);
+      foreach($entry as $t1){
+	foreach($t1 as $a => $b){
+	  $subobject->addPropertyValue("id",$cur_id);
+	}
+      };
+    };
+    
   }
   
   //////////////////////////////////////////////////

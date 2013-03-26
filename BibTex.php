@@ -34,8 +34,12 @@ $wgExtensionFunctions[] = 'efBibTexSetup';
 //$wgSpecialPageGroups['ExternBibShowEntry'] = 'other';
 
 // defaults
-if (!isset($wgExternBibDBFiles)) 
-  $wgExternBibDBFiles = "$dir/test/externbib.db";
+if (!isset($wgBibTexDBPage) || $wgBibTexDBPage == '') 
+  $wgBibTexDBPage = "Database";
+
+/*
+if (!isset($wgExternBibDBPage)) 
+  $wgExternBibDBPage = "Database";
 if (!isset($wgExternBibFileDirs)) 
   $wgExternBibFileDirs ="$dir/test/pdf" ;
 if (!isset($wgExternBibFileBaseURLs)) 
@@ -48,21 +52,20 @@ if (!isset($wgExternBibDefaultFormat)) {
   $wgExternBibDefaultFormat = array();
   $wgExternBibDefaultFormat["filelink"] = true;
 }
+*/
+
 
 // setup the module
 function efBibTexSetup() {
   global $wgParser, 
     $wgExternBib,
-    $wgExternBibDBFiles, 
-    $wgExternBibFileDirs, 
+    $wgBibTexDBPage, 
     $wgExternBibFileBaseURLs, 
     $wgExternBibDOIBaseURL,
     $wgExternBibEPrintBaseURL,
     $wgExternBibDefaultFormat;
 
-  $wgExternBib = new BibTex($wgExternBibDBFiles,
-			       $wgExternBibFileDirs, 
-			       $wgExternBibFileBaseURLs, 
+  $wgExternBib = new BibTex($wgBibTexDBPage,
 			       $wgExternBibDOIBaseURL,
 			       $wgExternBibEPrintBaseURL,
 			       $wgExternBibDefaultFormat
