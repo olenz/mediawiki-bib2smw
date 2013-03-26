@@ -1,7 +1,7 @@
 <?php
 if (!defined('MEDIAWIKI')) die();
 
-class ExternBib {
+class BibTex {
   // the database
   var $dbs = array();
   // the currently handled entry
@@ -14,41 +14,18 @@ class ExternBib {
   var $eprintbaseurl;
   var $default_format;
 
-  function ExternBib($dbfiles, 
+  function BibTex($dbfiles, 
 		     $filedirs,
 		     $filebaseurls,
 		     $doibaseurl,
 		     $eprintbaseurl,
 		     $default_format) {
-    if (!is_file(reset($dbfiles)))
-      error_log("ERROR: $dbfiles[0] does not exist!");
-    
-    if (!($this->dbs["icp"] = dba_open($dbfiles["icp"], 'rd'))) {
-          error_log("ERROR: Could not open $dbfiles[icp]!");
-    }
-    
-    if (!($this->dbs["library"] = dba_open($dbfiles["library"], 'rd'))) {
-          error_log("ERROR: Could not open $dbfiles[library]!");
-    }
-
-    if (is_array($filedirs))
-      $this->filedirs = $filedirs;
-    else
-      $this->filedirs = array($filedirs);
-
-    if (is_array($filebaseurls))
-      $this->filebaseurls = $filebaseurls;
-    else
-      $this->filebaseurls = array($filebaseurls);
-
-    if (count($this->filedirs) != count($this->filebaseurls))
-      error_log('ERROR: Number of elements in $wgExternBibFileDirs does not match number of elements in $wgExternBibFileURLs!');
-
-    $this->doibaseurl = $doibaseurl;
-    $this->eprintbaseurl = $eprintbaseurl;
-    $this->default_format = $default_format;
   }
 
+  function mytestfunc( $input, $argv, $parser, $frame ) {
+    return "Hallo welt!";
+  }
+  
   //////////////////////////////////////////////////
   // Handle <bibentry>
   //////////////////////////////////////////////////

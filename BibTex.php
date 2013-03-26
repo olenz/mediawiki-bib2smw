@@ -20,18 +20,18 @@ $dir = dirname(__FILE__) . '/';
 
 // directly load ExternBib.class.php, as an instance will be created
 // anyway
-require_once($dir . 'ExternBib.class.php');
+require_once($dir . 'BibTex.class.php');
 
 $wgExtensionMessagesFiles['ExternBib'] = $dir . 'ExternBib.i18n.php';
 $wgExtensionFunctions[] = 'efExternBibSetup';
 
-$wgAutoloadClasses['SpecialExternBibSearch'] = $dir . 'SpecialExternBibSearch.php';
-$wgSpecialPages['ExternBibSearch'] = 'SpecialExternBibSearch';
-$wgSpecialPageGroups['ExternBibSearch'] = 'other';
+//$wgAutoloadClasses['SpecialExternBibSearch'] = $dir . 'SpecialExternBibSearch.php';
+//$wgSpecialPages['ExternBibSearch'] = 'SpecialExternBibSearch';
+//$wgSpecialPageGroups['ExternBibSearch'] = 'other';
 
-$wgAutoloadClasses['SpecialExternBibShowEntry'] = $dir . 'SpecialExternBibShowEntry.php';
-$wgSpecialPages['ExternBibShowEntry'] = 'SpecialExternBibShowEntry';
-$wgSpecialPageGroups['ExternBibShowEntry'] = 'other';
+//$wgAutoloadClasses['SpecialExternBibShowEntry'] = $dir . 'SpecialExternBibShowEntry.php';
+//$wgSpecialPages['ExternBibShowEntry'] = 'SpecialExternBibShowEntry';
+//$wgSpecialPageGroups['ExternBibShowEntry'] = 'other';
 
 // defaults
 if (!isset($wgExternBibDBFiles)) 
@@ -60,7 +60,7 @@ function efExternBibSetup() {
     $wgExternBibEPrintBaseURL,
     $wgExternBibDefaultFormat;
 
-  $wgExternBib = new ExternBib($wgExternBibDBFiles,
+  $wgExternBib = new BibTex($wgExternBibDBFiles,
 			       $wgExternBibFileDirs, 
 			       $wgExternBibFileBaseURLs, 
 			       $wgExternBibDOIBaseURL,
