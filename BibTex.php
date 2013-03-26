@@ -22,8 +22,8 @@ $dir = dirname(__FILE__) . '/';
 // anyway
 require_once($dir . 'BibTex.class.php');
 
-$wgExtensionMessagesFiles['ExternBib'] = $dir . 'ExternBib.i18n.php';
-$wgExtensionFunctions[] = 'efExternBibSetup';
+$wgExtensionMessagesFiles['BibTex'] = $dir . 'BibTex.i18n.php';
+$wgExtensionFunctions[] = 'efBibTexSetup';
 
 //$wgAutoloadClasses['SpecialExternBibSearch'] = $dir . 'SpecialExternBibSearch.php';
 //$wgSpecialPages['ExternBibSearch'] = 'SpecialExternBibSearch';
@@ -50,7 +50,7 @@ if (!isset($wgExternBibDefaultFormat)) {
 }
 
 // setup the module
-function efExternBibSetup() {
+function efBibTexSetup() {
   global $wgParser, 
     $wgExternBib,
     $wgExternBibDBFiles, 
