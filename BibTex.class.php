@@ -46,19 +46,14 @@ class BibTex {
   }
   
   function updateDB($parser,$xmlPath,$from,$to){
-
-    
     $xml=simplexml_load_file($xmlPath);
     $k=0;
     foreach ($xml->entry as $entry){
       $k+=1;
       if ($k >= $from && $k < $to){
 	$cur_id='';
-	//$subobject = SMWSubobject($database,'BibTexEntry')
 	$data=array();
-	$dat2=array();
 	foreach($entry->attributes() as $a => $b){
-	  $dat2[$a]=$b;
 	  if ($a == "id"){
 	    $cur_id = $b;
 	  }
@@ -68,18 +63,14 @@ class BibTex {
 	}
 	else{
 	  array_push($data,"BibTeX_id=$cur_id");
-	  //$subobject->addPropertyValue("id",$cur_id);
 	  foreach($entry as $t1){
 	    foreach($t1 as $a => $b){
-	      $b=str_replace(array('[',']'),array("&#91;",'&#93;'),$b);
-	      $dat2[$a]=$b;
-	      if ($a !== 'abstract')
-		array_push($data,"BibTeX_$a=$b");
+	      $b=str_replace(array('[',']'),array('&#91;','&#93;'),$b);
+	      $b=str_replace(array('{','}'),array('',''),$b);
+	      array_push($data,"BibTeX_$a=$b");
 	    }
 	  }
 	  $subobjectname=$cur_id;
-	  //echo "\$cur_id=$cur_id<br><br>";
-	  //print_r($data);
 	  array_unshift($data,$cur_id);
 	  array_unshift($data,$parser);
 	  // As of PHP 5.3.1, call_user_func_array() requires that
@@ -91,8 +82,6 @@ class BibTex {
 	  }
 
 	  $err = call_user_func_array(array('SMWSubobject','render'),$refParams);
-	  //$err= SMWSubobject::render($parser, $subobjectname, $data);
-	  //$err=$this->add_item($parser,$dat2);
 	  if ($err){
 	    echo "Error ocoured<br>\n";
 	    //print_r($data);
@@ -165,30 +154,6 @@ class BibTex {
   //////////////////////////////////////////////////
   // helper functions
   //////////////////////////////////////////////////
-  // Add an item
-  function add_item(&$parser,$data){
-    if (isset($data['id'])){
-      $name=$data['id'];
-    }
-    else {
-      $name== '_' . hash( 'md4', implode( '|', $data ) , false );
-    }
-    $mainSemanticData = SMWParseData::getSMWData( $parser );
-    $subject = $mainSemanticData->getSubject();
-    
-    $diSubWikiPage = new SMWDIWikiPage( $subject->getDBkey(),
-					$subject->getNamespace(), $subject->getInterwiki(),
-					$name );
-    $subject = new SMWSubobject;
-    
-    
-    $semanticData = new SMWContainerSemanticData( $diSubWikiPage );
-    $prop = new SMWDIProperty('TYPE_BLOB');
-    
-    $subject->addPropertyDiValueToSemanticData( $parts[0], $parts[1], $semanticData );
-
-  }
-
   // returns whether $key exists in the array and whether it is true
   function array_isset($key, $array, $defaults) {
     return 
