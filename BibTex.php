@@ -34,12 +34,15 @@ $wgExtensionFunctions[] = 'efBibTexSetup';
 //$wgSpecialPageGroups['ExternBibShowEntry'] = 'other';
 
 // defaults
-if (!isset($wgBibTexDBPage) || $wgBibTexDBPage == '') 
-  $wgBibTexDBPage = "Database";
+if (!isset($wgBibTeXXMLPath) || $wgBibTexXMLPath == '' )
+  $wgBibTeXXMLPath = '/home/icp/public_html/testwiki/extensions/BibTex2/out.xml';
+if (!isset($wgBibTeXDBPage) || $wgBibTeXDBPage == '' ) 
+  $wgBibTeXDBPage = "Database";
+if (!isset($wgBibTeXDBSize))
+  $wgBibTeXDBSize = 1000;
+			   
 
 /*
-if (!isset($wgExternBibDBPage)) 
-  $wgExternBibDBPage = "Database";
 if (!isset($wgExternBibFileDirs)) 
   $wgExternBibFileDirs ="$dir/test/pdf" ;
 if (!isset($wgExternBibFileBaseURLs)) 
@@ -74,7 +77,7 @@ function efBibTexSetup() {
   // register the tags
   $wgParser->setHook("bibentry", array($wgExternBib, 'bibentry'));
   $wgParser->setHook("bibsearch", array($wgExternBib, 'bibsearch'));
-  $wgParser->setHook("fuu", array($wgExternBib, 'mytestfunc'));
+  $wgParser->setHook("updateBibTeXDB", array($wgExternBib, 'updateDB'));
   
   return true;
 }

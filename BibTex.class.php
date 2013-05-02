@@ -26,36 +26,80 @@ class BibTex {
 		     $doibaseurl,
 		     $eprintbaseurl,
 		     $default_format) {
-    $dbpage = $wgBibTexDBPage;
-    $database = Title::newFromText($dbpage);
-    if ($database==NULL || !$database->exists()){
-      echo "Warning:\"$dbpage\" does not exist!<br>";
-    }
-    else {
-      //$out .= "page is:".$page."<br>";
-    }
-  }
-
-  function mytestfunc( $input, $argv, $parser, $frame ) {
-    $out='';
-    //print_r($page);
-    //print_r($database -> getSemanticData ());
-    $args=explode(',',$input);
-    $out.=$this->updateDB($parser,'extensions/BibTex/out2.xml',$args[0],$args[1]);
-    return $out."Hallo Welt!";
+    //$dbpage = $wgBibTexDBPage;
+    //$database = Title::newFromText($dbpage);
+    //if ($database==NULL || !$database->exists()){
+    //  echo "Warning:\"$dbpage\" does not exist!<br>";
+    //}
+    //else {
+    //  $out .= "page is:".$page."<br>";
+    //}
   }
   
-  function updateDB($parser,$xmlPath,$from,$to){
+  function updateDB( $input, $argv, $parser, $frame ){
+    global $wgBibTeXXMLPath;
+    global $wgBibTeXDBPage;
+    global $wgBibTeXDBSize;
+    $nocheck=true;
+    $len=strlen($wgBibTeXDBPage);
+    $match=true;
+    $error='';
+    //$title=$_GET['title'];
+    $title=$parser->mTitle->mTextform;
+    if ( ! substr($title,1,$len-1) === substr($wgBibTeXDBPage,1,-1)){
+      $error.="Not called from a valid page"; return $error;
+    }
+    if ( strncmp($title,$wgBibTeXDBPage,1) != 0){
+      $error.="Not called from a valid page"; return $error;
+    }
+    $dbid=substr($title,$len);
+    if ($dbid==''){
+      $error.="Not called from a valid page"; return $error;
+    }
+    $dbid=(int) $dbid;
+    $ins=explode(',',$input);
+    $from=$ins[0];
+    if (isset($ins[1])){
+      $step=$ins[1];
+    }
+    else{
+      $step=$wgBibTeXDBSize;
+    }
+    if ($from == -1){
+      $from=$dbid*$step;
+    }
+    if ( !isset($_SERVER['SERVER_ADDR']) ||$_SERVER['REMOTE_ADDR'] === $_SERVER['SERVER_ADDR'] || (isset($_GET['enforce'] ) && $_GET['enforce']=='updateDB') || $nocheck){
+      //print_r($GLOBALS);
+      //die();
+      $page=new WikiPage(Title::newFromText($title));
+      $page->clear();
+      $to=$from+$step;
+      $GLOBALS['wgLangConvMemc']->expireAll();
+      return $this->doUpdateDB($parser, $wgBibTeXXMLPath, $from, $to,$error);
+    }
+    else{
+      $error.="You have no right to update the db. If you think you have the right, see in the code how to override this check.";
+      //echo "Replaced ".$this->recursive_array_replace("lastExpireAll",$GLOBALS,0)." times!";
+      //print_R($GLOBALS);
+      //die();
+      return $error;
+    }
+  }
+  
+  function doUpdateDB ($parser, $xmlPath, $from, $to, $error){
     $xml=simplexml_load_file($xmlPath);
     $k=0;
-    foreach ($xml->entry as $entry){
+    $parser->disableCache();
+    //foreach ($xml->entry as $entry){
+    while($xml->entry[$k]){
+      $entry=$xml->entry[$k];
       $k+=1;
       if ($k >= $from && $k < $to){
 	$cur_id='';
 	$data=array();
 	foreach($entry->attributes() as $a => $b){
 	  if ($a == "id"){
-	    $cur_id = $b;
+	    $cur_id = "$b";
 	  }
 	}
 	if ($cur_id==''){
@@ -67,6 +111,19 @@ class BibTex {
 	    foreach($t1 as $a => $b){
 	      $b=str_replace(array('[',']'),array('&#91;','&#93;'),$b);
 	      $b=str_replace(array('{','}'),array('',''),$b);
+	      if ($a=="year"){
+		$c=(int)substr($b,-4);
+		if ($c < 100){
+		  if ($c > 20)
+		    $c+=1900;
+		  else
+		    $c+=2000;
+		}
+		if ( "$c" !== "$b" ){
+		  $error.="$b was changed to $c<br>";
+		}
+		array_push($data,"BibTeX_year_int=$c");
+	      }
 	      array_push($data,"BibTeX_$a=$b");
 	    }
 	  }
@@ -80,19 +137,37 @@ class BibTex {
 	  foreach ( $data as $key => $value ) {
 	    $refParams[$key] = &$data[$key];
 	  }
-
+	  
+	  //$error.=$cur_id.' &nbsp; &nbsp; &nbsp; ';
 	  $err = call_user_func_array(array('SMWSubobject','render'),$refParams);
+	  //$err = call_user_func_array(array('SMWSubobject','render'),$data);
 	  if ($err){
 	    echo "Error ocoured<br>\n";
-	    //print_r($data);
+	    array_shift($data);
+	    print_r($data);
+	    echo "\$cur_id=$cur_id<br>\n";
 	    echo $err;
 	  }
 	}
       }
     }
-    return "Number of entrys: $k, we have done $from to $to";
+    return $error."Number of entrys: $k, we have done $from to ".max(min($k,$to),$from);
   }
-  
+
+  function recursive_array_replace($needle,$haystack,$replace) {
+    $replaced=0;
+    foreach($haystack as $key=>$value) {
+      if($needle===$key) {
+	$value=$replace;
+	$replaced+=1;
+      }
+      elseif ($value !== $haystack){
+	$replaced+=recursive_array_replace($needle,$value,$replace);
+      }
+    }
+    return $replaced;
+  }
+
   //////////////////////////////////////////////////
   // Handle <bibentry>
   //////////////////////////////////////////////////
