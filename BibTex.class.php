@@ -40,7 +40,7 @@ class BibTex {
     global $wgBibTeXXMLPath;
     global $wgBibTeXDBPage;
     global $wgBibTeXDBSize;
-    $nocheck=true;
+    $nocheck=false;
     $len=strlen($wgBibTeXDBPage);
     $match=true;
     $error='';
@@ -142,7 +142,7 @@ class BibTex {
 	  $err = call_user_func_array(array('SMWSubobject','render'),$refParams);
 	  //$err = call_user_func_array(array('SMWSubobject','render'),$data);
 	  if ($err){
-	    echo "Error ocoured<br>\n";
+	    echo "Error occured<br>\n";
 	    array_shift($data);
 	    print_r($data);
 	    echo "\$cur_id=$cur_id<br>\n";
