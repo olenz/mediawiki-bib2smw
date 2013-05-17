@@ -1,6 +1,7 @@
 #use jabref to generate an xml:
 
 WORKDIR=/web/icp/public_html/mediawiki/extensions/Bib2SMW/work
+WORKDIR=/web/icp/public_html/testwiki/extensions/Bib2SMW/work
 BIBFILE=$WORKDIR/icp.bib
 XMLFILE=$WORKDIR/icp.xml
 

@@ -69,7 +69,7 @@ rembraces_rex = re.compile('[{}]')
 capitalize_rex = re.compile('({\w*})')
  
 # used by bibtexkeywords(data)
-keywords_rex = re.compile('[,;]')
+keywords_rex = re.compile(',|(?<!&amp);')
 
 # used by concat_line(line)
 concatsplit_rex = re.compile('\s*#\s*')
