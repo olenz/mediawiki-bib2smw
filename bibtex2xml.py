@@ -249,6 +249,7 @@ def bibtexdecoder(filecontents_source):
 		line = string.replace(line, '\\"u', '&#252;')
 		line = string.replace(line, '---', '&#x2014;')
 		line = string.replace(line, '--', '-')
+                line = re.sub('\x02|\x03|\x04','',line)
 
 		filecontents.append(line)
 		

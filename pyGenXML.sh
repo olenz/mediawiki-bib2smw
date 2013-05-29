@@ -8,7 +8,7 @@ sed s/{\"}/\\\&quote\;/ $BIBFILE |sed s/{\"}/\\\&quote\;/ |sed s/{\"}/\\\&quote\
 
 
 echo "Real Parsing ..."
-#python bibtex2xml.py $BIBFILE.tmp > $XMLFILE.tmp
+python bibtex2xml.py $BIBFILE.tmp > $XMLFILE.tmp
 
 echo "Postfixing stuff ..."
 # fix some strange &#2; and other stuff,

@@ -30,6 +30,7 @@ class Bib2SMW {
     $error='';
     //$title=$_GET['title'];
     $title=$parser->mTitle->mTextform;
+    $bibName=substr($title,$len+1);
     if ( ! substr($title,1,$len-1) === substr($wgBibTeXDBPage,1,-1)){
       $error.="Not called from a valid page"; return $error;
     }
@@ -37,9 +38,11 @@ class Bib2SMW {
       $error.="Not called from a valid page"; return $error;
     }
     $dbid=substr($title,$len);
-    if ($dbid==''){
+    if ($bibName==''){
       $error.="Not called from a valid page"; return $error;
     }
+    $xmlpath=$wgBibTeXXMLPath.$bibName.'.bib';
+    $clearfile=$wgBibTeXXMLPath.$bibName.'.clear';
     $dbid=(int) $dbid;
     $ins=explode(',',$input);
     $from=$ins[0];
@@ -52,9 +55,23 @@ class Bib2SMW {
     if ($from == -1){
       $from=$dbid*$step;
     }
-    if ( !isset($_SERVER['SERVER_ADDR']) ||$_SERVER['REMOTE_ADDR'] === $_SERVER['SERVER_ADDR'] || (isset($_GET['enforce'] ) && $_GET['enforce']=='updateDB') || $nocheck){
+    if (!isset($_SERVER['SERVER_ADDR']))
+      $isscript=true;
+    else
+      $isscript=false;
+    if (isset($_GET['enforce'] ) && $_GET['enforce']=='clearSMW'){
+      touch($clearfile);
+    }
+    if (isset($_GET['undo'] ) && $_GET['undo']=='clearSMW'){
+      unlink($clearfile);
+    }
+    if ( $isscript ||$_SERVER['REMOTE_ADDR'] === $_SERVER['SERVER_ADDR'] || (isset($_GET['enforce'] ) && $_GET['enforce']=='updateDB') || $nocheck){
       //print_r($GLOBALS);
       //die();
+      if (file_exists($clearfile)){
+	$error.="Page is set to be cleared";
+	return $error;
+      }
       $page=new WikiPage(Title::newFromText($title));
       $page->clear();
       $to=$from+$step;
@@ -74,6 +91,10 @@ class Bib2SMW {
     $xml=simplexml_load_file($xmlPath);
     $k=0;
     $parser->disableCache();
+    if (!isset($_SERVER['SERVER_ADDR']))
+      $isscript=true;
+    else
+      $isscript=false;
     //foreach ($xml->entry as $entry){
     while($xml->entry[$k]){
       $entry=$xml->entry[$k];
@@ -96,7 +117,55 @@ class Bib2SMW {
 	      $b=str_replace(array('[',']'),array('&#91;','&#93;'),$value);
 	      $b=str_replace(array('{','}'),array('',''),$b);
 	      // process all data manualy
-	      switch ($key){
+	      switch ($key){//unprocessed string values
+	      case "title":
+	      case "title":
+	      case "journal":
+	      case "pages":
+	      case "abstract":
+	      case "note":
+	      case "doi":
+	      case "url":
+	      case "superseded":
+	      case "number":
+	      case "volume":
+		$value=trim($value);
+	        if ($value == "")
+		 continue;
+		array_push($data,"BibTeX_$key=$value");
+		break;
+	      case "DoesNotJetExist":
+		// int values, warn on change
+		$c=(int)$value;
+		if (strcmp("$c" , $value)){
+		  $msg="Warning: $key@$cur_id: changed $value to $c<br>\n";
+		  if ($isscript){ echo $msg; }else{ $error .= $msg;}
+		}
+		break;
+	      case "keywords":
+	      case "keyword":
+	      case "key":
+		$value=trim($value);
+	        if ($value == "")
+		 continue;
+		array_push($data,"BibTeX_keywords=$value");
+		break;
+	      case "author":
+		$tmp=true;
+		foreach ($value as $pers){
+		  $pers=trim($pers);
+		  if ($pers == "")
+		    continue;
+		  array_push($data,"BibTeX_$key=$pers");
+		  $tmp=false;
+		}
+		if ($tmp)
+		  array_push($data,"BibTeX_$key=$value");
+		break;
+	      case "eprint":
+	      case "e-print":
+		array_push($data,"BibTeX_eprint=$value");
+		break;
 	      case "year":
 		$c=(int)substr($b,-4);
 		if ($c < 100){
@@ -108,15 +177,32 @@ class Bib2SMW {
 		if ( "$c" !== "$b" ){
 		  $error.="$b was changed to $c<br>";
 		}
-		array_push($data,"BibTeX_year=$c");
+		array_push($data,"BibTeX_$key=$value");
+		array_push($data,"BibTeX_year_int=$c");
+		break;
+	      case "file":
+		$b=explode(":",$value);
+		/*if ($b[0] != $b[1]){
+		  $msg="Warning: $key@$cur_id: $value\n";
+		  if ($isscript){ echo $msg; }else{ $error .= $msg;}
+		}*/
+		if ($b[2]=="PDF"){
+		  array_push($data,"BibTeX_pdf=$b[1]");
+		}
+		break;
+	      case "timestamp"://ignore these
+	      case "owner":
+	      case "address":
+	      case "publisher":
+	      case "month":
+	      case "date-modified":
 		break;
 	      default:
-		echo $key," => ",$value,"<br>";
+		$error.=$key."@$cur_id => ".$value."<br>";
 		break;
 		
 
 	      }
-	      array_push($data,"BibTeX_$a=$b");
 	    }
 	  }
 	  $subobjectname=$cur_id;
@@ -131,7 +217,7 @@ class Bib2SMW {
 	  }
 	  
 	  // For debug: do not render stuff
-	  //$err = call_user_func_array(array('SMWSubobject','render'),$refParams);
+	  $err = call_user_func_array(array('SMWSubobject','render'),$refParams);
 	  if ($err){
 	    echo "Error occured<br>\n";
 	    array_shift($data);
