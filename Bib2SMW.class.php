@@ -45,16 +45,8 @@ class Bib2SMW {
     $clearfile=$wgBibTeXXMLPath.$bibName.'.clear';
     $dbid=(int) $dbid;
     $ins=explode(',',$input);
-    $from=$ins[0];
-    if (isset($ins[1])){
-      $step=$ins[1];
-    }
-    else{
-      $step=$wgBibTeXDBSize;
-    }
-    if ($from == -1){
-      $from=$dbid*$step;
-    }
+    $from=0;
+    $step=$wgBibTeXDBSize;
     if (!isset($_SERVER['SERVER_ADDR']))
       $isscript=true;
     else
@@ -189,7 +181,24 @@ class Bib2SMW {
 		if ($b[2]=="PDF"){
 		  array_push($data,"BibTeX_pdf=$b[1]");
 		}
+		else{
+		  $msg="Warning: $key@$cur_id: $value\n";
+		  array_push($data,"BibTeX_unknown=$key => $value");
+		}
 		break;
+	      case "nstandard":
+		$b=basename($value);
+		if (file_exists("/mnt/home_anoa/icpwiki/bib/".$b)){
+		  array_push($data,"BibTeX_pdf=$b");
+		  array_push($data,"BibTeX_pdf_size=".$this->size2str(filesize("/mnt/home_anoa/icpwiki/bib/".$b)));
+		}
+		elseif (file_exists($value)){
+		  array_push($data,"BibTeX_pdf=$value");
+		  array_push($data,"BibTeX_pdf_size=".$this->size2str(filesize($value)));
+		}
+		else{
+		  array_push($data,"BibTeX_pdf=$value");
+		}
 	      case "timestamp"://ignore these
 	      case "owner":
 	      case "address":
@@ -198,6 +207,7 @@ class Bib2SMW {
 	      case "date-modified":
 		break;
 	      default:
+		array_push($data,"BibTeX_unknown=$key => $value");
 		$error.=$key."@$cur_id => ".$value."<br>";
 		break;
 		
@@ -229,6 +239,39 @@ class Bib2SMW {
       }
     }
     return $error."Number of entrys: $k, we have done $from to ".max(min($k,$to),$from);
+  }
+
+  function size2str($size){
+    $k=1024;
+    if ($size<$k){
+      return "$size B";
+    }
+    $k*=1024;
+    if ($size<$k){
+      $k/=1024.;
+      $size=$this->round($size/$k,2);
+      return "$size kB";
+    }
+    $k*=1024;
+    if ($size<$k){
+      $k/=1024.;
+      $size=$this->round($size/$k,2);
+      return "$size MB";
+    }
+    $k*=1024;
+    $k/=1024.;
+    $size=$this->round($size/$k,2);
+    return "$size GB";
+  }
+
+  function round($num,$dig){
+    $t=$num;
+    $c=0;
+    while ($t > 10){
+      $t/=10;
+      $c++;
+    }
+    return round($num,$dig-$c);
   }
 
 }
