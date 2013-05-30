@@ -41,7 +41,10 @@ class Bib2SMW {
     if ($bibName==''){
       $error.="Not called from a valid page"; return $error;
     }
-    $xmlpath=$wgBibTeXXMLPath.$bibName.'.bib';
+    $xmlpath=$wgBibTeXXMLPath.$bibName.'.xml';
+    if (!file_exists($xmlpath)){
+      $error.="Not called from a valid page"; return $error;
+    }
     $clearfile=$wgBibTeXXMLPath.$bibName.'.clear';
     $dbid=(int) $dbid;
     $ins=explode(',',$input);
@@ -53,8 +56,10 @@ class Bib2SMW {
       $isscript=false;
     if (isset($_GET['enforce'] ) && $_GET['enforce']=='clearSMW'){
       touch($clearfile);
+      $error.="Disabled SMW<br>Refresh SMW is required<br>";
     }
     if (isset($_GET['undo'] ) && $_GET['undo']=='clearSMW'){
+      $error.="Activated SMW<br>Refresh SMW is required<br>";
       unlink($clearfile);
     }
     if ( $isscript ||$_SERVER['REMOTE_ADDR'] === $_SERVER['SERVER_ADDR'] || (isset($_GET['enforce'] ) && $_GET['enforce']=='updateDB') || $nocheck){
@@ -62,13 +67,14 @@ class Bib2SMW {
       //die();
       if (file_exists($clearfile)){
 	$error.="Page is set to be cleared";
+	echo "Page is set to be cleared\n";
 	return $error;
       }
       $page=new WikiPage(Title::newFromText($title));
       $page->clear();
       $to=$from+$step;
       $GLOBALS['wgLangConvMemc']->expireAll();
-      return $this->doUpdateDB($parser, $wgBibTeXXMLPath, $from, $to,$error);
+      return $this->doUpdateDB($parser, $xmlpath, $from, $to,$error);
     }
     else{
       $error.="You have no right to update the db. If you think you have the right, see in the code how to override this check.";
@@ -116,8 +122,6 @@ class Bib2SMW {
 	      case "pages":
 	      case "abstract":
 	      case "note":
-	      case "doi":
-	      case "url":
 	      case "superseded":
 	      case "number":
 	      case "volume":
@@ -133,6 +137,26 @@ class Bib2SMW {
 		  $msg="Warning: $key@$cur_id: changed $value to $c<br>\n";
 		  if ($isscript){ echo $msg; }else{ $error .= $msg;}
 		}
+		break;
+	      case "url":
+		$value=trim($value);
+	        if ($value == "")
+		 continue;
+		$url = parse_url($value);
+		if (!isset($url['scheme'])){
+		  $value="http://$value";
+		}
+		array_push($data,"BibTeX_$key=$value");
+		break;
+	      case "doi":
+		$value=trim($value);
+		if (strncasecmp($value,"DOI:",4)==0){
+		  $value=substr($value,4);
+		  $value=trim($value);
+		}
+	        if ($value == "")
+		 continue;
+		array_push($data,"BibTeX_$key=$value");
 		break;
 	      case "keywords":
 	      case "keyword":
@@ -173,20 +197,22 @@ class Bib2SMW {
 		array_push($data,"BibTeX_year_int=$c");
 		break;
 	      case "file":
+	      case "nstandard":
 		$b=explode(":",$value);
+		$s=count($b);
 		/*if ($b[0] != $b[1]){
 		  $msg="Warning: $key@$cur_id: $value\n";
 		  if ($isscript){ echo $msg; }else{ $error .= $msg;}
 		}*/
-		if ($b[2]=="PDF"){
-		  array_push($data,"BibTeX_pdf=$b[1]");
+		if ($s > 1){
+		  if ($b[$s-1]=="PDF"){
+		    $value=$b[$s-2];
+		  }
+		  else{
+		    $msg="Warning: $key@$cur_id: $value\n";
+		    array_push($data,"BibTeX_unknown=$key => $value");
+		  }
 		}
-		else{
-		  $msg="Warning: $key@$cur_id: $value\n";
-		  array_push($data,"BibTeX_unknown=$key => $value");
-		}
-		break;
-	      case "nstandard":
 		$b=basename($value);
 		if (file_exists("/mnt/home_anoa/icpwiki/bib/".$b)){
 		  array_push($data,"BibTeX_pdf=$b");

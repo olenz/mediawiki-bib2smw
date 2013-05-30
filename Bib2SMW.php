@@ -22,19 +22,20 @@ $dir = dirname(__FILE__) . '/';
 // anyway
 require_once($dir . 'Bib2SMW.class.php');
 
+//$wgAutoloadClasses[ 'SpecialBib2SMW' ] = $dir . '/SpecialBib2SMW.php';
 $wgExtensionMessagesFiles['Bib2SMW'] = $dir . 'Bib2SMW.i18n.php';
 $wgExtensionFunctions[] = 'efBib2SMWSetup';
 
 
 // defaults
 if (!isset($wgBibTeXXMLPath) || $wgBibTexXMLPath == '' )
-  $wgBibTeXXMLPath = '/home/icp/public_html/testwiki/extensions/Bib2SMW/work/icp.xml';
+  $wgBibTeXXMLPath = '/home/icp/public_html/testwiki/extensions/Bib2SMW/work/';
 if (!isset($wgBibTeXDBPage) || $wgBibTeXDBPage == '' ) 
   $wgBibTeXDBPage = "Database";
 if (!isset($wgBibTeXDBSize))
   // for testing:
-  $wgBibTeXDBSize = 100;
-  // $wgBibTeXDBSize = 100000;
+  //$wgBibTeXDBSize = 1000;
+  $wgBibTeXDBSize = 100000;
 			   
 
 
