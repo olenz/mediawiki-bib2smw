@@ -1,10 +1,10 @@
-xre<?php
+<?php
 /**
- * Internationalisation file for extension MediaFunctions.
+ * Internationalisation file for extension Bib2SMW.
  *
  * @addtogroup Extensions
  * @author Olaf Lenz <olenz@icp.uni-stuttgart.de>
- * @version 2.0
+ * @version 1.0
  */
 
 $messages = array();
