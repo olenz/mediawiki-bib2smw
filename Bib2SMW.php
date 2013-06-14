@@ -28,8 +28,10 @@ $wgExtensionFunctions[] = 'efBib2SMWSetup';
 
 
 // defaults
+if (!isset($wgBibTeXPDFPath) || $wgBibTeXPDFPath == '' )
+  $wgBibTeXPDFPath = $dir.'pdf/';
 if (!isset($wgBibTeXXMLPath) || $wgBibTexXMLPath == '' )
-  $wgBibTeXXMLPath = '/home/icp/public_html/testwiki/extensions/Bib2SMW/work/';
+  $wgBibTeXXMLPath = $dir.'work/';
 if (!isset($wgBibTeXDBPage) || $wgBibTeXDBPage == '' ) 
   $wgBibTeXDBPage = "Database";
 if (!isset($wgBibTeXDBSize))

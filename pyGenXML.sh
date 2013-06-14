@@ -1,4 +1,6 @@
-WORKDIR="/web/icp/public_html/testwiki/extensions/Bib2SMW/work"
+#!/bin/sh
+
+WORKDIR=`pwd`/work
 
 BIBFILE="$WORKDIR/icp.bib"
 XMLFILE="$WORKDIR/icp.xml"
@@ -17,3 +19,5 @@ sed -e s/\&\#2\;/?/ $XMLFILE.tmp |sed -e s/\&\#2\;/?/ |sed -e s/\&\#3\;/?/ |sed 
 s/\&\#3\;/?/ |sed -e s/\&\#2\;/?/ |sed -e s/\&\#2\;/?/ |sed -e s/\&\#2\;/?/ \
 |sed -e s/\&\#4\;/?/ |sed -e s/\&\</?\</ | sed -e s/bibtex:// | \
 sed -e s/bibtex:// | sed  s/\0x1B//g | sed  s/\0x0B//g | sed  s/\0x0C//g | sed  s/\0x02//g  > $XMLFILE
+
+php ../SemanticMediaWiki/maintenance/SMW_refreshData.php --page="Database_icp"

@@ -110,8 +110,9 @@ class Bib2SMW {
 	}
 	else{
 	  array_push($data,"BibTeX_id=$cur_id");
-	  foreach($entry as $t1){
-	    foreach($t1 as $key => $value){
+	  foreach($entry as $type => $toparse){
+	    array_push($data,"BibTeX_type=$type");
+	    foreach($toparse as $key => $value){
 	      $b=str_replace(array('[',']'),array('&#91;','&#93;'),$value);
 	      $b=str_replace(array('{','}'),array('',''),$b);
 	      // process all data manualy
@@ -275,18 +276,18 @@ class Bib2SMW {
     $k*=1024;
     if ($size<$k){
       $k/=1024.;
-      $size=$this->round($size/$k,2);
+      $size=Bib2SMW::round($size/$k,2);
       return "$size kB";
     }
     $k*=1024;
     if ($size<$k){
       $k/=1024.;
-      $size=$this->round($size/$k,2);
+      $size=Bib2SMW::round($size/$k,2);
       return "$size MB";
     }
     $k*=1024;
     $k/=1024.;
-    $size=$this->round($size/$k,2);
+    $size=Bib2SMW::round($size/$k,2);
     return "$size GB";
   }
 
