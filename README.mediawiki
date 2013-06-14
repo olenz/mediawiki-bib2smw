@@ -1,0 +1,5 @@
+= Extension:Bib2SMW =
+
+This is an extension that allows to parse a BibTeX-file into a
+Semantic Mediawiki installation, so that the BibTeX records can be
+queried and displayed.
