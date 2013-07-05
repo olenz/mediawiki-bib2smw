@@ -229,9 +229,9 @@ class Bib2SMW {
 		  }
 		}
 		$b=basename($value);
-		if (file_exists("/mnt/home_anoa/icpwiki/bib/".$b)){
+		if (file_exists($wgBib2SMWPDFPath.$b)){
 		  array_push($data,"BibTeX_pdf=$b");
-		  array_push($data,"BibTeX_pdf_size=".$this->size2str(filesize("/mnt/home_anoa/icpwiki/bib/".$b)));
+		  array_push($data,"BibTeX_pdf_size=".$this->size2str(filesize($wgBib2SMWPDFPath.$b)));
 		}
 		elseif (file_exists($value)){
 		  array_push($data,"BibTeX_pdf=$value");

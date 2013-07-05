@@ -35,8 +35,6 @@ if (!isset($wgBibTeXXMLPath) || $wgBibTexXMLPath == '' )
 if (!isset($wgBibTeXDBPage) || $wgBibTeXDBPage == '' ) 
   $wgBibTeXDBPage = "Database";
 if (!isset($wgBibTeXDBSize))
-  // for testing:
-  //$wgBibTeXDBSize = 1000;
   $wgBibTeXDBSize = 100000;
 			   
 
