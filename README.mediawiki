@@ -3,3 +3,44 @@
 This is an extension that allows to parse a BibTeX-file into a
 Semantic Mediawiki installation, so that the BibTeX records can be
 queried and displayed.
+
+= Options =
+If you want to have the filesize of the PDFs, ou need to set
+"$wgBib2SMWPDFPath" to the Paths where the PDFs are. This is only used to save
+the filesize, not for displaying.
+
+"$wgBibTeXXMLPath" is The Path where your parsed BibTeX Files are expected.
+You can easily parse them using the 'pyGenXML.sh'. If you change the Path of
+the bib / xml files, you will have to change it both in LocalSettings and in
+the bash file.
+
+"$wgBibTeXDBPage" is the 'prefix' of the Pagename, used to store the SMW-data
+The Page name is also used to determine the name of your xml-file. If your xml
+file is called 'ICP.xml', than you should create the page $wgBibTeXDBPage_ICP
+with the content <updateBib2SMW/>
+
+"$wgBibTeXDBSize" is there so that you can limit how many entrys are
+parsed. This value should be bigger than the number of entrys in your bib
+file.
+
+
+= INSTALL =
+1. In order to use it you have to add 
+require_once("extensions/Bib2SMW/Bib2SMW.php" );
+to your LocalSettings.php.
+
+2. You might want to change some options
+
+3. Create a wikipage named $wgBibTeXDBPage_$filename_without_xml
+eg. "Database_ICP". This page has to contain the entry <updateBib2SMW/>
+
+4. Import the properties for the BibTeX-entries.
+
+5. Create and run your updatescript. This script should include:
+ 5.1 Get the current .bib file
+ 5.2 parse the .bib file with pyGenXML.sh
+ 5.3 cd to extensions/SemanticMediaWiki/maintenance and call the maintainance
+ script php SMW_refreshData.php --page="Database_ICP" where you have to enter
+ the correct page name.
+
+6. Import the Templates of create your own Templates for displaying the Data.
