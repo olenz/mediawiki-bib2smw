@@ -116,7 +116,7 @@ class Bib2SMW {
 	      $b=str_replace(array('[',']'),array('&#91;','&#93;'),$value);
 	      $b=str_replace(array('{','}'),array('',''),$b);
 	      // process all data manualy
-	      switch ($key){//unprocessed string values
+	      switch ($key){//process all string values which wont get changed
 	      case "title":
 	      case "title":
 	      case "journal":
@@ -126,6 +126,14 @@ class Bib2SMW {
 	      case "superseded":
 	      case "number":
 	      case "volume":
+	      case "series":
+	      case "chapter":
+	      case "booktitle":
+	      case "publisher":
+	      case "address":
+	      case "pubaddress":
+	      case "school":
+	      case "editor":
 		$value=trim($value);
 	        if ($value == "")
 		 continue;
@@ -196,6 +204,12 @@ class Bib2SMW {
 		}
 		array_push($data,"BibTeX_$key=$value");
 		array_push($data,"BibTeX_year_int=$c");
+		break;
+	      case "type":
+		$value=trim($value);
+	        if ($value == "")
+		 continue;
+		array_push($data,"BibTeX_type_desc=$value");
 		break;
 	      case "file":
 	      case "nstandard":
