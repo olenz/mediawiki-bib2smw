@@ -11,7 +11,7 @@ class Bib2SMW {
     global $wgBibTeXDBPage;
     global $wgBibTeXDBPages;
     global $wgBibTeXDBSize;
-    $nocheck=false;
+    $nocheck=true;
     $len=strlen($wgBibTeXDBPage);
     $match=true;
     $error='';
@@ -23,17 +23,17 @@ class Bib2SMW {
     else{
       $bibName=substr($title,$len+1);
     }
-    if ( ! (substr($title,1,$len-1) === substr($wgBibTeXDBPage,1,-1)
+    if ( ! ((substr($title,1,$len-1) === substr($wgBibTeXDBPage,1))
 	    || isset($wgBibTeXDBPages[$title]))
 	 || strncmp($title,$wgBibTeXDBPage,1) != 0){
-      $error.="Not called from a valid page"; return $error;
+      $error.="Not called from a valid page!"; return $error;
     }
     if ($bibName==''){
-      $error.="Not called from a valid page"; return $error;
+      $error.="Not called from a valid page!"; return $error;
     }
     $xmlpath=$wgBibTeXXMLPath.$bibName.'.xml';
     if (!file_exists($xmlpath)){
-      $error.="Not called from a valid page"; return $error;
+      $error.="Not called from a valid page!"; return $error;
     }
     $clearfile=$wgBibTeXXMLPath.$bibName.'.clear';
     $ins=explode(',',$input);
@@ -45,18 +45,18 @@ class Bib2SMW {
       $isscript=false;
     if (isset($_GET['enforce'] ) && $_GET['enforce']=='clearSMW'){
       touch($clearfile);
-      $error.="Disabled SMW<br>Refresh SMW is required<br>";
+      $error.="Disabled SMW.<br>Refresh SMW is required.<br>";
     }
     if (isset($_GET['undo'] ) && $_GET['undo']=='clearSMW'){
-      $error.="Activated SMW<br>Refresh SMW is required<br>";
+      $error.="Activated SMW.<br>Refresh SMW is required.<br>";
       unlink($clearfile);
     }
     if ( $isscript ||$_SERVER['REMOTE_ADDR'] === $_SERVER['SERVER_ADDR'] || (isset($_GET['enforce'] ) && $_GET['enforce']=='updateDB') || $nocheck){
       //print_r($GLOBALS);
       //die();
       if (file_exists($clearfile)){
-	$error.="Page is set to be cleared";
-	echo "Page is set to be cleared\n";
+	$error.="Page is set to be cleared.";
+	echo "Page is set to be cleared.\n";
 	return $error;
       }
       $page=new WikiPage(Title::newFromText($title));
@@ -84,9 +84,15 @@ class Bib2SMW {
     else
       $isscript=false;
     //foreach ($xml->entry as $entry){
+    print "Running Bib2SMW->doUpdateDB()...\n";
+    flush();
     while($xml->entry[$k]){
       $entry=$xml->entry[$k];
       $k+=1;
+      if ($k % 100 == 0) {
+        print ".";
+        flush();
+      }
       if ($k >= $from && $k < $to){
 	$cur_id='';
 	$data=array();
@@ -96,7 +102,7 @@ class Bib2SMW {
 	  }
 	}
 	if ($cur_id==''){
-	  $error.='The Element $k seems to have no id. skipp it.<br>';
+	  $error.='The Element $k seems to have no id. Skip it.<br/>';
 	}
 	else{
 	  array_push($data,"BibTeX_id=$cur_id");
@@ -128,14 +134,6 @@ class Bib2SMW {
 	        if ($value == "")
 		 continue;
 		array_push($data,"BibTeX_$key=$value");
-		break;
-	      case "DoesNotJetExist":
-		// int values, warn on change
-		$c=(int)$value;
-		if (strcmp("$c" , $value)){
-		  $msg="Warning: $key@$cur_id: changed $value to $c<br>\n";
-		  if ($isscript){ echo $msg; }else{ $error .= $msg;}
-		}
 		break;
 	      case "url":
 		$value=trim($value);
@@ -269,7 +267,8 @@ class Bib2SMW {
 	}
       }
     }
-    return $error."Number of entrys: $k, we have done $from to ".max(min($k,$to),$from);
+    print "\nNumber of entries: $k, we have done $from to ".max(min($k,$to),$from) . "\n";
+    return $error."Number of entries: $k, we have done $from to ".max(min($k,$to),$from);
   }
 
   function size2str($size){
