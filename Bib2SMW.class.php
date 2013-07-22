@@ -1,28 +1,15 @@
 <?php
 if (!defined('MEDIAWIKI')) die();
 
-class Bib2SMW {
-  // The Page which has all the entrys
-  var $database;
-  
-  // parameters
-  var $dbpage;
-
+class Bib2SMW {  
 
   function Bib2SMW() {
-    //$dbpage = $wgBibTexDBPage;
-    //$database = Title::newFromText($dbpage);
-    //if ($database==NULL || !$database->exists()){
-    //  echo "Warning:\"$dbpage\" does not exist!<br>";
-    //}
-    //else {
-    //  $out .= "page is:".$page."<br>";
-    //}
   }
   
   function updateDB( $input, $argv, $parser, $frame ){
     global $wgBibTeXXMLPath;
     global $wgBibTeXDBPage;
+    global $wgBibTeXDBPages;
     global $wgBibTeXDBSize;
     $nocheck=false;
     $len=strlen($wgBibTeXDBPage);
@@ -30,14 +17,17 @@ class Bib2SMW {
     $error='';
     //$title=$_GET['title'];
     $title=$parser->mTitle->mTextform;
-    $bibName=substr($title,$len+1);
-    if ( ! substr($title,1,$len-1) === substr($wgBibTeXDBPage,1,-1)){
+    if (isset($wgBibTeXDBPages[$title])){
+      $bibName=$wgBibTeXDBPages[$title];
+    }
+    else{
+      $bibName=substr($title,$len+1);
+    }
+    if ( ! (substr($title,1,$len-1) === substr($wgBibTeXDBPage,1,-1)
+	    || isset($wgBibTeXDBPages[$title]))
+	 || strncmp($title,$wgBibTeXDBPage,1) != 0){
       $error.="Not called from a valid page"; return $error;
     }
-    if ( strncmp($title,$wgBibTeXDBPage,1) != 0){
-      $error.="Not called from a valid page"; return $error;
-    }
-    $dbid=substr($title,$len);
     if ($bibName==''){
       $error.="Not called from a valid page"; return $error;
     }
@@ -46,7 +36,6 @@ class Bib2SMW {
       $error.="Not called from a valid page"; return $error;
     }
     $clearfile=$wgBibTeXXMLPath.$bibName.'.clear';
-    $dbid=(int) $dbid;
     $ins=explode(',',$input);
     $from=0;
     $step=$wgBibTeXDBSize;
