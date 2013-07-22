@@ -34,6 +34,8 @@ if (!isset($wgBibTeXXMLPath) || $wgBibTexXMLPath == '' )
   $wgBibTeXXMLPath = $dir.'work/';
 if (!isset($wgBibTeXDBPage) || $wgBibTeXDBPage == '' ) 
   $wgBibTeXDBPage = "Database";
+if (!isset($wgBibTeXDBPages) || $wgBibTeXDBPages == '' ) 
+  $wgBibTeXDBPages = Array();
 if (!isset($wgBibTeXDBSize))
   $wgBibTeXDBSize = 100000;
 			   
