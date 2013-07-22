@@ -86,6 +86,7 @@ class Bib2SMW {
   }
   
   function doUpdateDB ($parser, $xmlPath, $from, $to, $error){
+    global $wgBib2SMWPDFPath;
     $xml=simplexml_load_file($xmlPath);
     $k=0;
     $parser->disableCache();
